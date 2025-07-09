@@ -1,38 +1,47 @@
-import cv2
+import os
+import cv2 as cv
+import numpy as np
 
-image_depth = np.array(frame.getData("depth"), copy=False)
-# Get the AB frame
-image_ab = np.array(frame.getData("ab"), copy=False)
-# Get the confidence frame
-image_conf = np.array(frame.getData("conf"), copy=False)
+# Ensure output folder exists
+output_folder = os.path.join(os.getcwd(), "images")
+os.makedirs(output_folder, exist_ok=True)
 
-###################################################################################################################################################
+# Normalize the depth image to 0-255 for visualization
 depth_min = np.min(image_depth)
 depth_max = np.max(image_depth)
-
-# Normalize depth to range 0-255
 depth_normalized = (255 * (image_depth - depth_min) / (depth_max - depth_min)).astype(np.uint8)
-cv2.imshow("Depth Image", depth_normalized)
 
+# Save normalized depth image
+cv.imwrite(os.path.join(output_folder, f'depth_norm_{num}.png'), depth_normalized)
 
-#surface (50, 50) cluster:
+# Save raw depth image as 16-bit PNG (will be clamped if out of range)
+cv.imwrite(os.path.join(output_folder, f'depth_raw_{num}.png'), image_depth)
+
+# Save raw data as .npy for full precision
+np.save(os.path.join(output_folder, f'depth_raw_{num}.npy'), image_depth)
+
+# ----------------------------------------------------------------
+# Annotations
+
+# Define cluster centers
 cluster1_center = (50, 50)  # near side
+cluster2_center = (frameDataDetails.width // 2, frameDataDetails.height // 2)  # center (implant area)
+cluster_size = 50  # pixels radius for rectangle
 
-#breast (50, 50) cluster:
-cluster2_center = (frameDataDetails.width // 2, frameDataDetails.height // 2)  # middle
-
-cluster_size = 50  # pixels radius for cluster
+# Create a copy to draw annotations (don't draw on original)
+depth_with_annotations = depth_normalized.copy()
 
 # Draw rectangles around cluster centers
-cv2.rectangle(depth_normalized, 
-              (cluster1_center[0] - cluster_size, cluster1_center[1] - cluster_size),
-              (cluster1_center[0] + cluster_size, cluster1_center[1] + cluster_size),
-              color=200, thickness=2)  # light gray rectangle
+cv.rectangle(depth_with_annotations,
+             (cluster1_center[0] - cluster_size, cluster1_center[1] - cluster_size),
+             (cluster1_center[0] + cluster_size, cluster1_center[1] + cluster_size),
+             color=200, thickness=2)
 
-cv2.rectangle(depth_normalized,
-              (cluster2_center[0] - cluster_size, cluster2_center[1] - cluster_size),
-              (cluster2_center[0] + cluster_size, cluster2_center[1] + cluster_size),
-              color=200, thickness=2)
+cv.rectangle(depth_with_annotations,
+             (cluster2_center[0] - cluster_size, cluster2_center[1] - cluster_size),
+             (cluster2_center[0] + cluster_size, cluster2_center[1] + cluster_size),
+             color=200, thickness=2)
 
-cv2.imshow("Depth Image with Clusters", depth_normalized)
-
+# Display and save annotated image
+cv.imshow("Depth Image with Clusters", depth_with_annotations)
+cv.imwrite(os.path.join(output_folder, f'depth_annotated_{num}.png'), depth_with_annotations)
