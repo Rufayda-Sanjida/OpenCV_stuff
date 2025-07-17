@@ -48,23 +48,40 @@ print("depth frame details:", "width:", frameDataDetails.width, "height:", frame
 ##################################################################################################################
 
 
-# Get the depth frame
-image_depth = np.array(frame.getData("depth"), copy=False)
-# Get the AB frame
-image_ab = np.array(frame.getData("ab"), copy=False)
-# Get the confidence frame
-image_conf = np.array(frame.getData("conf"), copy=False)
+depth_map = np.array(frame.getData("depth"), dtype="uint16", copy=False)
+ab_map = np.array(frame.getData("ab"), dtype="uint16", copy=False)
+xyz_map = np.array(frame.getData("xyz"), dtype="int16", copy=False)
 
-## accessing the depth data here:
-print()
-print()
-print("Camera and depth ability is working! Lets see what we got!")
-print()
-print()
-print("Image Depth Data:")
-print(image_depth)
-print()
-print()
+# Save depth to CSV
+np.savetxt("depth_map.csv", depth_map, delimiter=",", fmt="%d")
+
+# Save point cloud to PLY
+xyz_points = np.resize(xyz_map, (depth_map.shape[0] * depth_map.shape[1], 3))
+pc = o3d.geometry.PointCloud()
+pc.points = o3d.utility.Vector3dVector(xyz_points.astype(np.float32))
+o3d.io.write_point_cloud("point_cloud.ply", pc)
+
+
+
+
+
+# # Get the depth frame
+# image_depth = np.array(frame.getData("depth"), copy=False)
+# # Get the AB frame
+# image_ab = np.array(frame.getData("ab"), copy=False)
+# # Get the confidence frame
+# image_conf = np.array(frame.getData("conf"), copy=False)
+
+# ## accessing the depth data here:
+# print()
+# print()
+# print("Camera and depth ability is working! Lets see what we got!")
+# print()
+# print()
+# print("Image Depth Data:")
+# print(image_depth)
+# print()
+# print()
 
 #ignore but you can do some frame correcting????
 # # Get camera details for frame correction
