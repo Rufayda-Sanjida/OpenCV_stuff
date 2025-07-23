@@ -1,0 +1,41 @@
+first_frame.py = starts the camera, takes a pic, displays it using numpy, (can be saved)
+"This is a basic example that shows how to get a single frame from the camera."
+
+depth-image-animation-pygame.py
+- this is for seeming the frame in real time
+
+skeletal_tracking.py
+- Real-time skeletal tracking using ML
+
+rawparser.py
+- used for when you save the adi stuff using bin and this script helps you view it
+- parses recorded raw .bin frame files. You have raw binary files recorded from the camera.
+
+- You want to visualize, extract, or process data offline.
+
+- You want to generate datasets or analyze recordings.
+
+
+saveCCBToFile.py
+- Connects to the camera (USB or network).
+
+- Reads the CCB (camera configuration binary) from device memory.
+
+- Saves it as a .ccb file locally.
+
+
+dual_cameras.py
+- used for when you have 2 cameras 
+
+data_collect.py
+- used for saving images to disk
+
+
+first_frame.py
+depth-image-animation-pygame.py
+showPointCloud.py
+data_collect.py
+duel_camera.py
+saveCCBToFile.py
+rawparser.py
+skeletal_tracking.py
