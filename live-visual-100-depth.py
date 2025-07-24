@@ -136,29 +136,29 @@ def main():
         x += 1
         surface, average_depth, normalizedImage = animate()
         total_average = total_average + average_depth
-        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
 
-        screen.blit(surface, (0, 0))
 
+        screen.blit(surface, (0, 0)) 
+        
         # Draw red rectangle overlay in center
         rect_size = 20
         rect_x = (window_size[0] - rect_size) // 2
         rect_y = (window_size[1] - rect_size) // 2
         pygame.draw.rect(screen, (255, 0, 0), (rect_x, rect_y, rect_size, rect_size), 2)
-
+        
         pygame.display.flip()
         pygame.time.delay(20)
 
     # quit Pygame
     pygame.quit()
-
+    
     #save the normalized image! if this works then I WANT TO PUT A DISPLAY TO SEE IF IT MATCHESSSS UP
     surfaceLastImage, middlelastImage, normalizedImage = animate()
     image_bgr = cv2.cvtColor(normalizedImage, cv2.COLOR_RGB2BGR)
-    cv2.rectangle(image_bgr, (rect_x, rect_y), (rect_x + rect_size, rect_y + rect_size), (255, 0, 0), 2)
+    cv2.rectangle(image_bgr, (rect_x, rect_y), (rect_x + rect_size, rect_y + rect_size), (0, 0, 255), 2)
     cv2.imwrite("last_normalized_depth.png", image_bgr)
     print("Saved last normalized depth image as last_normalized_depth.png")
 
@@ -166,7 +166,8 @@ def main():
     middle_average_depth_100 = total_average / 100
     print(f"Average depth of center region over 100 frames: {middle_average_depth_100:.2f} mm")
     status = camera1.stop()
-    
+
+   
 main()
 
 
