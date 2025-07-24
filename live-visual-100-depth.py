@@ -158,6 +158,7 @@ def main():
     #save the normalized image! if this works then I WANT TO PUT A DISPLAY TO SEE IF IT MATCHESSSS UP
     surfaceLastImage, middlelastImage, normalizedImage = animate()
     image_bgr = cv2.cvtColor(normalizedImage, cv2.COLOR_RGB2BGR)
+    cv2.rectangle(image_bgr, (rect_x, rect_y), (rect_x + rect_size, rect_y + rect_size), (255, 0, 0), 2)
     cv2.imwrite("last_normalized_depth.png", image_bgr)
     print("Saved last normalized depth image as last_normalized_depth.png")
 
