@@ -114,7 +114,8 @@ def animate():
     # Compute the starting row and column for the center region and get the depth:
     height, width = image.shape
     start_row = (height - 100) // 2
-    start_col = (width - 100) // 2
+    offsetPixels = 100
+    start_col = ((width - 100) // 2) + offsetPixels #right side
     middle = image[start_row:start_row+100, start_col:start_col+100]
     middle_depth_average = np.mean(middle)
     
