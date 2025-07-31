@@ -165,81 +165,42 @@ if __name__ == "__main__":
             depth_map = np.uint8(depth_map)
             depth_map = cv.applyColorMap(depth_map, cv.COLORMAP_WINTER)
 
-            # Show depth image
-            vis_depth.add_geometry(transform_image(depth_map))
-            vis_depth.poll_events()
 
-            # Show the point cloud
-            point_cloud.points = o3d.utility.Vector3dVector(xyz_points)
-            point_cloud.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
-            if first_time_render_pc:
-                vis.add_geometry(point_cloud)
-                first_time_render_pc = 0
-            vis.update_geometry(point_cloud)
-            vis.poll_events()
-            vis.update_renderer()
+            # --- Get center region ---
+            box_size = 50  # size of square region (e.g., 50x50)
+            height, width = depth_map.shape
 
-            if cv.waitKey(1) >= 0:
-                break
-    
-    
-    
-    else:
-        # Reading binary file 
-        frame = tof.Frame()
-        frameHandler = tof.FrameHandler()
-        status = frameHandler.readNextFrame(frame, fileName)
-        if not status:
-            print('Failed to read frame with status: ', status)
+            center_y = height // 2
+            center_x = width // 2
 
-        frameDataDetails = tof.FrameDataDetails()
-        status = frame.getDataDetails("depth", frameDataDetails)
-        width = frameDataDetails.width
-        height = frameDataDetails.height
+            # Define top-left and bottom-right corners of the box
+            top_left = (center_x - box_size // 2, center_y - box_size // 2)
+            bottom_right = (center_x + box_size // 2, center_y + box_size // 2)
 
-        # Get camera details for frame correction
-        # TO DO: Get the range from camera details when it will be defined
-        camera_range = 4096
-        bitCount = 12
-        max_value_of_AB_pixel = 2 ** bitCount - 1
-        distance_scale_ab = 255.0 / max_value_of_AB_pixel
-        distance_scale = 255.0 / camera_range
+            # Extract the ROI from depth map (in mm)
+            roi_depth = depth_map[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
 
-        # Create visualizer for depth and ab
-        vis_depth = o3d.visualization.Visualizer()
-        vis_depth.create_window("Depth", 2 * width, 2 * height)
+            # Calculate some stats
+            mean_depth = np.mean(roi_depth)
+            min_depth = np.min(roi_depth)
+            max_depth = np.max(roi_depth)
+            center_depth = depth_map[center_y, center_x]
 
-        vis_ab = o3d.visualization.Visualizer()
-        vis_ab.create_window("AB", 2 * width, 2 * height)
+            print(f"Center Depth (mm): {center_depth}")
+            print(f"Region Mean Depth (mm): {mean_depth:.2f}, Min: {min_depth}, Max: {max_depth}")
 
-        # Create visualizer
-        vis = o3d.visualization.Visualizer()
-        vis.create_window("PointCloud", 1200, 1200)
-        first_time_render_pc = 1
-        point_cloud = o3d.geometry.PointCloud()
 
-        while True:
-
-            depth_map = np.array(frame.getData("depth"), dtype="uint16", copy=False)
-            ab_map = np.array(frame.getData("ab"), dtype="uint16", copy=False)
-            xyz_map = np.array(frame.getData("xyz"), dtype="int16", copy=False)
-
-            # Create the AB image
-            ab_map = ab_map[0: int(ab_map.shape[0]), :]
-            ab_map = distance_scale_ab * ab_map
-            ab_map = np.uint8(ab_map)
-            ab_map = cv.cvtColor(ab_map, cv.COLOR_GRAY2RGB)
-
-            # Show AB image
-            vis_ab.add_geometry(transform_image(ab_map))
-            vis_ab.poll_events()
-
-            # Create the Depth image
-            xyz_points = np.resize(xyz_map, (int(depth_map.shape[0]) * depth_map.shape[1], 3))
-            depth_map = depth_map[0: int(depth_map.shape[0]), :]
-            depth_map = distance_scale * depth_map
-            depth_map = np.uint8(depth_map)
+            #drawing:
             depth_map = cv.applyColorMap(depth_map, cv.COLORMAP_WINTER)
+            # Draw rectangle in red on color-mapped depth image
+            cv.rectangle(depth_map, top_left, bottom_right, (0, 0, 255), 2)  # BGR color (red), thickness 2
+            cv.imshow("ROI Depth in mm (center region)", (roi_depth / 4096 * 255).astype(np.uint8))
+
+
+
+
+
+            ###------------------------------------------------------------------------------------------------------------------------
 
             # Show depth image
             vis_depth.add_geometry(transform_image(depth_map))
@@ -257,3 +218,7 @@ if __name__ == "__main__":
 
             if cv.waitKey(1) >= 0:
                 break
+    
+    
+    
+  
